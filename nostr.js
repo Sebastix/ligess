@@ -52,6 +52,17 @@ const verifyZapRequest = async (zapRequest, queryAmount) => {
     throw new Error(`Multiple e tags on zap request`)
   }
 
+  // TODO: if there is an a tag, validate a tag value which contains an event coordinate
+  const atags = getTags(zapRequest.tags, 'a')
+
+
+  // If there is an (uppercase) P tag, validate P tag.
+  // There MUST be 0 or 1 P tags. If there is one, it MUST be equal to the zap receipt's pubkey.
+  const Ptags = getTags(zapRequest.tags, 'P')
+  if (Ptags.length === 1 && Ptags[0] !== zapRequest.pubkey) {
+    throw new Error(`P tag is not equal to the pubkey on the zap request event`)
+  }
+
   const relaytags = getTags(zapRequest.tags, 'relays')
   if (relaytags.length === 0) {
     throw new Error(`No relay tag on zap request`)
