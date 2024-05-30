@@ -105,8 +105,16 @@ const handleInvoiceUpdate = async (invoice) => {
   const ptags = getTags(zapRequest.tags, 'p')
   zapNote.tags.push(ptags[0])
 
+  // Set optional P tag which is the pubkey of the sender of the zap from the zap request.
+  const Ptags = getTags(zapRequest.tags, 'P')
+  if (Ptags.length === 1 ) zapNote.tags.push(Ptags[0])
+
   const etags = getTags(zapRequest.tags, 'e')
   if (etags.length === 1) zapNote.tags.push(etags[[0]])
+
+  // Set optional a tag from the zap request.
+  const atags = getTags(zapRequest.tags, 'a')
+  if (atags.length === 1) zapNote.tags.push(atags[0])
 
   zapNote.tags.push(['bolt11', invoice.bolt11])
   zapNote.tags.push(['description', JSON.stringify(zapRequest)])
