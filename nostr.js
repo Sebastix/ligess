@@ -81,6 +81,17 @@ const verifyZapRequest = async (zapRequest, queryAmount) => {
     throw new Error(`Multiple e tags on zap request`)
   }
 
+  // TODO: if there is an a tag, validate a tag value which contains an event coordinate
+  const atags = getTags(zapRequest.tags, 'a')
+
+
+  // If there is an (uppercase) P tag, validate P tag.
+  // There MUST be 0 or 1 P tags. If there is one, it MUST be equal to the zap receipt's pubkey.
+  const Ptags = getTags(zapRequest.tags, 'P')
+  if (Ptags.length === 1 && Ptags[0] !== zapRequest.pubkey) {
+    throw new Error(`P tag is not equal to the pubkey on the zap request event`)
+  }
+
   const relaytags = getTags(zapRequest.tags, 'relays')
   if (relaytags.length === 0) {
     throw new Error(`No relay tag on zap request`)
@@ -133,8 +144,16 @@ const handleInvoiceUpdate = async (invoice) => {
   const ptags = getTags(zapRequest.tags, 'p')
   zapNote.tags.push(ptags[0])
 
+  // Set optional P tag which is the pubkey of the sender of the zap from the zap request.
+  const Ptags = getTags(zapRequest.tags, 'P')
+  if (Ptags.length === 1 ) zapNote.tags.push(Ptags[0])
+
   const etags = getTags(zapRequest.tags, 'e')
   if (etags.length === 1) zapNote.tags.push(etags[[0]])
+
+  // Set optional a tag from the zap request.
+  const atags = getTags(zapRequest.tags, 'a')
+  if (atags.length === 1) zapNote.tags.push(atags[0])
 
   zapNote.tags.push(['bolt11', invoice.bolt11])
   zapNote.tags.push(['description', JSON.stringify(zapRequest)])
