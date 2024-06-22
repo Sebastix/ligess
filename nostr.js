@@ -195,21 +195,21 @@ function sendNote(url, note, logger) {
   });
 
   relay.on('notice', (notice) => {
-    logger.info({msg: notice, relay: relay.url})
+    logger.info({msg: 'Notice', relay: relay.url, message: notice})
   });
 
   relay.on('message', (message) => {
-    logger.info({msg: message, relay: relay.url})
+    logger.info({msg: 'Message', relay: relay.url, message: message})
   })
 
   relay.on('close', (e) => {
     if (e.code !== 1000 && e.code !== 1005) {
-      logger.info({msg: 'Close', relay: relay.url, code: e.code, reason: e.reason})
+      logger.info({msg: 'Close', relay: relay.url, message: e.reason, code: e.code})
     }
   });
 
   relay.on('error', (e) => {
-    logger.warn({msg: e.message, relay: relay.url})
+    logger.warn({msg: 'Error', relay: relay.url, message: e.message})
   });
   
   relay.on('ok', (id, success, message) => {
