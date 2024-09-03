@@ -122,7 +122,7 @@ Configure the external relay URL with `LIGESS_NOSTR_WALLET_CONNECT_RELAY`. Any i
 
 It's also possible to configure a Relay Information Document (NIP-11) by specifying a file in `LIGESS_NOSTR_RELAY_INFORMATION`.
 
-The connection string to use in the app is composed as follows: `nostrconnect://<pubkey>?relay:<relay url>&secret=<privkey>`.
+The connection string to use in the app is composed as follows: `nostr+walletconnect://<pubkey>?relay:<relay url>&secret=<privkey>`.
 
 If the private key and relay are configured, running `node showWalletConnectQR.js` will generate a QR code of this connection string that can be scanned by a mobile app.
 
