@@ -1,5 +1,5 @@
 const fastify = require('fastify')({ logger: true })
-const { signId, calculateId, verifyEvent, getPublicKey, decryptDm } = require('nostr')
+const { signId, calculateId, verifyEvent, getPublicKey, decryptDm, encryptDm } = require('nostr')
 const { bech32 } = require('bech32')
 const buffer = require('buffer')
 const { getLnClient } = require('./lnClient')
@@ -90,7 +90,7 @@ const handleRelayConnection = (connection, request) => {
             let response = {
               pubkey: _nostrWalletConnectEncryptPubKey,
               kind: 13194,
-              content: 'pay_invoice',
+              content: 'pay_invoice'
             }
             response.id = await calculateId(response)
             response.sig = await signId(_nostrWalletConnectEncryptPrivKey, response.id)
@@ -225,6 +225,9 @@ async function processZapRequest(zapRequest, logger) {
     kind: 23195,
     pubkey: _nostrWalletConnectEncryptPubKey,
     created_at: Math.round(Date.now() / 1000),
+    content: {
+      result_type: 'pay_invoice',
+    },
     tags: [['e', zapRequest.id]]
   }
 
@@ -240,15 +243,22 @@ async function processZapRequest(zapRequest, logger) {
     zaps.push({ timestamp: Date.now(), amount: invoice.satoshis })
     fs.writeFileSync(ZAPS_FILE, JSON.stringify(zaps))
 
-    response.content = invoicePaid.paymentPreimage
+    response.content.result = {
+      preimage: invoicePaid.paymentPreimage
+    }
   }
   catch (error) {
     logger.warn({msg: 'Error processing zap request', error: error.message})
 
     response.kind = 23196
-    response.content = error.message
+    response.content.error = {
+      code: 'OTHER',
+      message: error.message 
+    }
+
   }
 
+  response.content = encryptDm(_nostrWalletConnectEncryptPrivKey, _nostrWalletConnectEncryptPubKey, JSON.stringify(response.content))
   response.id = await calculateId(response)
   response.sig = await signId(_nostrWalletConnectEncryptPrivKey, response.id)
 
