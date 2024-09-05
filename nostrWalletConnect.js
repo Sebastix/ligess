@@ -222,7 +222,7 @@ async function processZapRequest(zapRequest, logger) {
   let response = {
     kind: 23195,
     pubkey: _nostrWalletConnectEncryptPubKey,
-    created_at: Date.parse(invoice.settleDate) / 1000,
+    created_at: Date.now() / 1000,
     tags: [['e', zapRequest.id]]
   }
 
