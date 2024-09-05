@@ -92,9 +92,9 @@ const handleRelayConnection = (connection, request) => {
             }
             response.id = await calculateId(response)
             response.sig = await signId(_nostrWalletConnectEncryptPrivKey, response.id)
-            send(JSON.stringify(['EVENT', subscriptionId, response]))
+            send('EVENT', subscriptionId, response)
           }
-          send(JSON.stringify(['EOSE', subscriptionId]))
+          send('EOSE', subscriptionId)
           break
 
         case 'EVENT':
@@ -117,13 +117,13 @@ const handleRelayConnection = (connection, request) => {
     }
   })
 
-  function checkProgress() {
+  async function checkProgress() {
     if (!isAuthenticated) return
     if (!zapRequest) return
 
-    let zapResponse = processZapRequest(zapRequest, logger)
+    let zapResponse = await processZapRequest(zapRequest, logger)
 
-    send(JSON.stringify(['EVENT', zapResponse]))
+    send('EVENT', zapResponse)
 
     zapRequest = null
   }
@@ -138,7 +138,7 @@ const handleRelayConnection = (connection, request) => {
     logger.info({msg: message})
   })
 
-  send(JSON.stringify(['AUTH',challenge]))
+  send('AUTH',challenge)
 
   setTimeout(() => {
     if (!isAuthenticated) {
@@ -147,9 +147,9 @@ const handleRelayConnection = (connection, request) => {
     }
   }, 10000)
 
-  function send(message) {
+  function send(...message) {
     logger.info({msg: 'Message sent', message: message})
-    connection.socket.send(message)
+    connection.socket.send(JSON.stringify(message))
   }
 }
 
