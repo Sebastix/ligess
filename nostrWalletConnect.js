@@ -220,7 +220,9 @@ async function verifyAuthResponse(authResponse, challenge) {
 
 async function processZapRequest(zapRequest, logger) {
   let response = {
+    kind: 23195,
     pubkey: _nostrWalletConnectEncryptPubKey,
+    created_at: Date.parse(invoice.settleDate) / 1000,
     tags: [['e', zapRequest.id]]
   }
 
@@ -236,7 +238,6 @@ async function processZapRequest(zapRequest, logger) {
     zaps.push({ timestamp: Date.now(), amount: invoice.satoshis })
     fs.writeFileSync(ZAPS_FILE, JSON.stringify(zaps))
 
-    response.kind = 23195
     response.content = invoicePaid.paymentPreimage
   }
   catch (error) {
