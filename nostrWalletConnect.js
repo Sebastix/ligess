@@ -77,7 +77,7 @@ const handleRelayConnection = (connection, request) => {
     try {
       const message = JSON.parse(data);
 
-      // logger.info({msg: 'Message received', message: message})
+      logger.info({msg: 'Message received', message: message})
 
       switch(message[0])
       {
@@ -92,9 +92,9 @@ const handleRelayConnection = (connection, request) => {
             }
             response.id = await calculateId(response)
             response.sig = await signId(_nostrWalletConnectEncryptPrivKey, response.id)
-            connection.socket.send(JSON.stringify(['EVENT', subscriptionId, response]))
+            send(JSON.stringify(['EVENT', subscriptionId, response]))
           }
-          connection.socket.send(JSON.stringify(['EOSE', subscriptionId]))
+          send(JSON.stringify(['EOSE', subscriptionId]))
           break
 
         case 'EVENT':
@@ -123,7 +123,7 @@ const handleRelayConnection = (connection, request) => {
 
     let zapResponse = processZapRequest(zapRequest, logger)
 
-    connection.socket.send(JSON.stringify(['EVENT', zapResponse]))
+    send(JSON.stringify(['EVENT', zapResponse]))
 
     zapRequest = null
   }
@@ -135,17 +135,22 @@ const handleRelayConnection = (connection, request) => {
   })
 
   connection.socket.on('error', async (message) => {
-    console.log({msg: message})
+    logger.info({msg: message})
   })
 
-  connection.socket.send(JSON.stringify(['AUTH',challenge]))
+  send(JSON.stringify(['AUTH',challenge]))
 
   setTimeout(() => {
     if (!isAuthenticated) {
-      console.log({msg: 'Closing idle connection'})
+      logger.info({msg: 'Closing idle connection'})
       connection.socket.close()
     }
   }, 10000)
+
+  function send(message) {
+    logger.info({msg: 'Message sent', message: message})
+    connection.socket.send(message)
+  }
 }
 
 async function verifyZapRequest(zapRequest) {
