@@ -72,6 +72,8 @@ const handleRelayConnection = (connection, request) => {
 
   let zapRequest = null
 
+  let subscriptionId = null
+
   connection.socket.on('message', async (data) => {
 
     try {
@@ -82,7 +84,7 @@ const handleRelayConnection = (connection, request) => {
       switch(message[0])
       {
         case 'REQ':
-          const subscriptionId = message[1]
+          subscriptionId = message[1]
           const payload = message[2]
           if (payload.kinds && payload.kinds.includes(13194)) {
             let response = {
@@ -123,7 +125,7 @@ const handleRelayConnection = (connection, request) => {
 
     let zapResponse = await processZapRequest(zapRequest, logger)
 
-    send('EVENT', zapResponse)
+    send('EVENT', subscriptionId, zapResponse)
 
     zapRequest = null
   }
