@@ -2,7 +2,7 @@
 
 ## Your personal Lightning address server
 > Like an email address, but for your Bitcoin!
-A massively simpler way for anyone to send you Bitcoin instantly on the Lightning Network.
+A massively simpler way for anyone to send you Bitcoin instantly on the Lightning Network and send and receive zaps on Nostr.
 
 *https://lightningaddress.com/*
 
@@ -19,7 +19,7 @@ A massively simpler way for anyone to send you Bitcoin instantly on the Lightnin
 
 ### Standalone
 ``` shell
-git clone https://github.com/dolu89/ligess
+git clone https://github.com/mutatrum/ligess
 cd ligess && yarn install
 cp .env.example .env
 # Edit .env with your info
@@ -28,7 +28,7 @@ yarn dev
 
 ### Using Docker compose
 ``` shell
-git clone https://github.com/dolu89/ligess
+git clone https://github.com/mutatrum/ligess
 # Edit `docker-compose.yml` with your details.
 docker-compose up -d
 ```
@@ -96,18 +96,23 @@ For sending zap notes on Nostr, you have to supply a Nostr private Key in `.env`
 LIGESS_NOSTR_ZAPPER_PRIVATE_KEY=this1is2an3example
 ```
 
+You can create a new private key locally with:
+```
+openssl rand -hex 32
+```
+
 To have zap requests working from web clients, and prevent CORS errors, make sure to add the following header to the web server configuration:
 ```
 Access-Control-Allow-Origin "*";
 ```
 
 #### Nostr metadata
-To have ligess send a kind 0 (metadata) note, create a json file and refer to it with the `LIGESS_NOSTR_METADATA_FILE` property in the `.env` config file. An example is provided in `metadata.json.example`.
+To have ligess send a kind 0 (metadata) note for your zap sender profile, create a json file and refer to it with the `LIGESS_NOSTR_METADATA_FILE` property in the `.env` config file. An example is provided in `metadata.json.example`.
 
-This note will be sent once per relay.
+This metadata note will be sent once per relay.
 
 #### Nostr Wallet Connect
-To enable Nostr Wallet Connect (aka One-Tap-Zaps), set `LIGESS_NOSTR_WALLET_CONNECT_SECRET` with a Nostr private key. It is recommended to generate a new public/private keypair for this, as it will be shared with the apps that use Nostr Wallet Connect feature and can spend funds from your node.
+To enable Nostr Wallet Connect (aka One-Tap-Zaps), set `LIGESS_NOSTR_WALLET_CONNECT_SECRET` with a Nostr private key. It is recommended to generate another new public/private keypair for this, as it will be shared with the apps that use Nostr Wallet Connect feature and can spend funds from your node.
 
 First, create a new macaroon, as Ligess needs the `offchain:write` permission to be able to pay invoices.
 
@@ -126,9 +131,7 @@ The connection string to use in the app is composed as follows: `nostr+walletcon
 
 If the private key and relay are configured, running `node showWalletConnectQR.js` will generate a QR code of this connection string that can be scanned by a mobile app.
 
-For extra security, it's possible to require authentication on the relay connection. When using Amethyst, it will authenticate using the keys of the logged in user. To enforce this, set the pubkey of that user with `LIGESS_NOSTR_WALLET_CONNECT_PUBLIC_KEY`.
-
-Damus is currently untested.
+For extra security, it's possible to require authentication on the relay connection. When using Amethyst or Nostter, it will authenticate using the keys of the logged in user. To enforce this, set the pubkey of that user with `LIGESS_NOSTR_WALLET_CONNECT_PUBLIC_KEY`.
 
 ##### Budget limitations
 Ligess has a mandatory budget configuration for Nostr Wallet Connect. This limits the amounts of a single zap, and of hour and day spends:
@@ -137,7 +140,7 @@ LIGESS_NOSTR_WALLET_CONNECT_BUDGET_ZAP=5000
 LIGESS_NOSTR_WALLET_CONNECT_BUDGET_HOUR=25000
 LIGESS_NOSTR_WALLET_CONNECT_BUDGET_DAY=100000
 ```
-Zap amounts and timestamps for the last day are stored in a `zaps.json` file. This is to keep the budget in tact after a restart.
+Zap amounts and timestamps for the last day are stored in a `zaps.json` file. This is to persist the expended budget with restarts.
 
 ## Support this project
 You can help me by contributing to this project or by donating to my Lightning address `dolu@bips.xyz`
