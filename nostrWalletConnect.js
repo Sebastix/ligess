@@ -157,36 +157,36 @@ const handleRelayConnection = (connection, request) => {
 
 async function verifyZapRequest(zapRequest) {
   if (zapRequest.kind != 23194)
-    throw new Error(`Event is not a zap request`)
+    throw new Error('Event is not a zap request')
 
   if (Math.abs(zapRequest.created_at - Math.floor(Date.now() / 1000)) > 10)
     throw new Error('Timestamp out of bounds')
 
   if (zapRequest.pubkey != _nostrWalletConnectEncryptPubKey)
-    throw new Error(`Event has unknown pubkey`)
+    throw new Error('Event has unknown pubkey')
 
   if (!zapRequest.tags || zapRequest.tags.length === 0)
-    throw new Error(`No tags on zap request`)
+    throw new Error('No tags on zap request')
 
   const ptags = getTags(zapRequest.tags, 'p')
   if (ptags.length === 0)
-    throw new Error(`No p tag on zap request`)
+    throw new Error('No p tag on zap request')
   if (ptags.length >= 2)
-    throw new Error(`Multiple p tags on zap request`)
+    throw new Error('Multiple p tags on zap request')
 
   const etags = getTags(zapRequest.tags, 'e')
   if (etags.length >= 2)
-    throw new Error(`Multiple e tags on zap request`)
+    throw new Error('Multiple e tags on zap request')
 
   if (await calculateId(zapRequest) !== zapRequest.id)
-    throw new Error(`Invalid id on zap request`)
+    throw new Error('Invalid id on zap request')
   if (!await verifyEvent(zapRequest))
-    throw new Error(`Invalid signature in zap request`)
+    throw new Error('Invalid signature in zap request')
 }
 
 async function verifyAuthResponse(authResponse, challenge) {
   if (authResponse.kind != 22242)
-    throw new Error(`Auth event is not an auth response`)
+    throw new Error('Auth event is not an auth response')
 
   if (Math.abs(authResponse.created_at - Math.floor(Date.now() / 1000)) > 10)
     throw new Error('Timestamp out of bounds')
@@ -195,23 +195,23 @@ async function verifyAuthResponse(authResponse, challenge) {
   if (challengeTags.length != 1)
     throw new Error('Challange tags invalid length')
   if (challengeTags[0][1] != challenge)
-    throw new Error(`Challenge does not match`)
+    throw new Error('Challenge does not match')
 
   const relayTags = getTags(authResponse.tags, 'relay')
   if (relayTags.length != 1)
-    throw new Error(`Relay tags invalid length`)
+    throw new Error('Relay tags invalid length')
   let relay = new URL(relayTags[0][1])
 
   if (relay.protocol !== 'ws:' && relay.protocol !== 'wss:')
     throw new Error('Invalid relay protocol')
 
   if (process.env.HOST != '0.0.0.0' && relay.host !== _nostrWalletConnectRelayHost)
-    throw new Error(`Relay host mismatch`)
+    throw new Error('Relay host mismatch')
 
   if (await calculateId(authResponse) !== authResponse.id)
-    throw new Error(`Invalid id on auth response`)
+    throw new Error('Invalid id on auth response')
   if (!await verifyEvent(authResponse))
-    throw new Error(`Invalid signature in auth response`)
+    throw new Error('Invalid signature in auth response')
 
   // AUTH response could be on either pubkey
   if (authResponse.pubkey !== _nostrWalletConnectAuthPubKey && authResponse.pubkey !== _nostrWalletConnectEncryptPubKey)
@@ -252,7 +252,7 @@ async function processZapRequest(zapRequest, logger) {
 
     response.kind = 23196
     response.content.error = {
-      code: 'OTHER',
+      code: error.name ?? 'OTHER',
       message: error.message 
     }
 
@@ -272,7 +272,7 @@ function decryptInvoice(zapRequest, logger) {
   logger.info({ msg: 'Pay request', content: payRequest })
 
   if (payRequest.method !== 'pay_invoice')
-    throw new Error('Unknown method on zap request')
+    throw new Error('NOT_IMPLEMENTED', 'Unknown method on zap request')
 
   const invoice = bolt11.decode(payRequest.params.invoice)
 

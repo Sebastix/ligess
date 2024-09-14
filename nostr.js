@@ -4,8 +4,8 @@ const { bech32 } = require('bech32')
 const buffer = require('buffer')
 const fs = require('fs')
 
-const _nostrPrivKey = process.env.LIGESS_NOSTR_ZAPPER_PRIVATE_KEY
-const _nostrPubKey = _nostrPrivKey ? getPublicKey(_nostrPrivKey) : null
+const _nostrZapperPrivKey = process.env.LIGESS_NOSTR_ZAPPER_PRIVATE_KEY
+const _nostrZapperPubKey = _nostrZapperPrivKey ? getPublicKey(_nostrZapperPrivKey) : null
 
 const getMetadataNote = (file) => {
   if (file) {
@@ -16,7 +16,7 @@ const getMetadataNote = (file) => {
     try {
       let content = JSON.parse(metadata)
       return {
-        pubkey: _nostrPubKey,
+        pubkey: _nostrZapperPubKey,
         kind: 0,
         created_at: Math.floor(Date.now() / 1000),
         tags: [],
@@ -34,14 +34,14 @@ const _nostrMetadataNote = getMetadataNote(process.env.LIGESS_NOSTR_METADATA_FIL
 const pendingZapRequests = {}
 const sentMetadata = []
 
-if (_nostrPubKey) {
-  fastify.log.info({msg: 'Nostr Lightning Zaps (NIP-57) enabled', npub: encode('npub', _nostrPubKey)})
+if (_nostrZapperPubKey) {
+  fastify.log.info({msg: 'Nostr Lightning Zaps (NIP-57) enabled', npub: encode('npub', _nostrZapperPubKey)})
 }
 if (_nostrMetadataNote) {
   fastify.log.info({msg: 'Nostr Metadata Kind 0 (NIP-01) enabled', note: _nostrMetadataNote})
 }
 
-const getNostrPubKey = () => _nostrPubKey
+const getNostrZapperPubKey = () => _nostrZapperPubKey
 
 const verifyZapRequest = async (zapRequest, queryAmount) => {
   if (!zapRequest) return
@@ -135,7 +135,7 @@ const handleInvoiceUpdate = async (invoice) => {
 
   const zapNote = {
     kind: 9735,
-    pubkey: _nostrPubKey,
+    pubkey: _nostrZapperPubKey,
     created_at: Date.parse(invoice.settleDate) / 1000,
     tags: [],
     content: content
@@ -160,7 +160,7 @@ const handleInvoiceUpdate = async (invoice) => {
   zapNote.tags.push(['preimage', invoice.preImage])
 
   zapNote.id = await calculateId(zapNote)
-  zapNote.sig = await signId(_nostrPrivKey, zapNote.id)
+  zapNote.sig = await signId(_nostrZapperPrivKey, zapNote.id)
 
   logger.info({msg: 'Invoice settled', note: zapNote.id, amount: invoice.amount, npub: encode('npub', zapRequest.pubkey), comment: content})
 
@@ -181,7 +181,7 @@ function sendNote(url, note, logger) {
     if (_nostrMetadataNote) {
       if (!_nostrMetadataNote.id) {
         _nostrMetadataNote.id = await calculateId(_nostrMetadataNote)
-        _nostrMetadataNote.sig = await signId(_nostrPrivKey, _nostrMetadataNote.id)
+        _nostrMetadataNote.sig = await signId(_nostrZapperPrivKey, _nostrMetadataNote.id)
       }
       if (!sentMetadata.includes(url)) {
         await relay.send(["EVENT", _nostrMetadataNote])
@@ -229,4 +229,4 @@ function encode(prefix, hex) {
   return bech32.encode(prefix, words);
 }
 
-module.exports = { getNostrPubKey, verifyZapRequest, storePendingZapRequest, handleInvoiceUpdate }
+module.exports = { getNostrZapperPubKey, verifyZapRequest, storePendingZapRequest, handleInvoiceUpdate }

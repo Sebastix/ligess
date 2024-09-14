@@ -3,7 +3,7 @@ fastify.register(require('@fastify/websocket'));
 const { bech32 } = require('bech32')
 const crypto = require('crypto')
 const { getLnClient } = require('./lnClient')
-const { getNostrPubKey, verifyZapRequest, storePendingZapRequest, handleInvoiceUpdate } = require('./nostr')
+const { getNostrZapperPubKey, verifyZapRequest, storePendingZapRequest, handleInvoiceUpdate } = require('./nostr')
 const { isWalletConnectEnabled, getWalletConnectHandler, getWalletConnectWsHandler } = require('./nostrWalletConnect')
 
 const _username = process.env.LIGESS_USERNAME
@@ -11,7 +11,7 @@ const _domain = process.env.LIGESS_DOMAIN
 const _identifier = `${_username}@${_domain}`
 const _lnurlpUrl = `https://${_domain}/.well-known/lnurlp/${_username}`
 const _metadata = [['text/identifier', _identifier], ['text/plain', `Satoshis to ${_identifier}`]]
-const _nostrPubKey = getNostrPubKey()
+const _nostrZapperPubKey = getNostrZapperPubKey()
 
 const unaWrapper = getLnClient()
 
@@ -60,9 +60,9 @@ fastify.get('/.well-known/lnurlp/:username', async (request, reply) => {
         metadata: JSON.stringify(_metadata),
         commentAllowed: 280,
       }
-      if (_nostrPubKey) {
+      if (_nostrZapperPubKey) {
         result.allowsNostr = true
-        result.nostrPubkey = _nostrPubKey
+        result.nostrPubkey = _nostrZapperPubKey
       }
       return result
     } else {
@@ -105,7 +105,7 @@ fastify.get('/.well-known/lnurlp/:username', async (request, reply) => {
   }
 })
 
-if (_nostrPubKey) {
+if (_nostrZapperPubKey) {
   unaWrapper.watchInvoices().on('invoice-updated', (invoice) => handleInvoiceUpdate(invoice))
 }
 
