@@ -112,7 +112,7 @@ To have ligess send a kind 0 (metadata) note for your zap sender profile, create
 This metadata note will be sent once per relay.
 
 #### Nostr Wallet Connect
-To enable Nostr Wallet Connect (aka One-Tap-Zaps), set `LIGESS_NOSTR_WALLET_CONNECT_SECRET` with a Nostr private key. It is recommended to generate another new public/private keypair for this, as it will be shared with the apps that use Nostr Wallet Connect feature and can spend funds from your node.
+To enable Nostr Wallet Connect (aka One-Tap-Zaps), set `LIGESS_NOSTR_WALLET_CONNECT_PRIVATE_KEY` with a Nostr private key. It is recommended to generate another new public/private keypair for this, as it will be shared with the apps that use Nostr Wallet Connect feature and can spend funds from your node.
 
 First, create a new macaroon, as Ligess needs the `offchain:write` permission to be able to pay invoices.
 
