@@ -88,6 +88,7 @@ const handleRelayConnection = (connection, request) => {
           const payload = message[2]
           if (payload.kinds && payload.kinds.includes(13194)) {
             let response = {
+              created_at: Math.round(Date.now() / 1000),
               pubkey: _nostrWalletConnectEncryptPubKey,
               kind: 13194,
               content: 'pay_invoice'
