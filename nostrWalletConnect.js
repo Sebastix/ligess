@@ -310,7 +310,6 @@ function getTags(tags, tag) {
 
 function filterZaps(timeWindow) {
   let now = Date.now()
-  console.log(zaps);
   return zaps.filter(zap => zap.timestamp > now - timeWindow)
 }
 
